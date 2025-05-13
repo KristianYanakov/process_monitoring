@@ -52,3 +52,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     monitor(args.interval, args.sort, args.descending)
+    #this is if you want to call it as such:
+    #python main.py --interval 2 --sort mem --desc
+    #refresh the table every 2 seconds, sort by memory usage descending
