@@ -46,6 +46,14 @@
                 <td>{{ process.name }}</td>
                 <td>{{ process.cpu }}</td>
                 <td>{{ process.mem }}</td>
+                <!--<td>
+                    {% if process.cpu_spike %}
+                        DANGEROUS CPU
+                    {% endif %}
+                    {% if process.mem_spike %}
+                        DANGEROUS MEMORY
+                    {% endif %}
+                </td>-->
             </tr>
             {% endfor %}
         </tbody>
