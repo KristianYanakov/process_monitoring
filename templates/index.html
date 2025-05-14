@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Process Monitoring</title>
+    <meta http-equiv="refresh" content="5">
+    <link rel="stylesheet" href = "style.css">
+
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            padding:20px;
+        }
+
+        table{
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td{
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th{
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>Live Process Monitoring</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>PID</th>
+                <th>Name</th>
+                <th>CPU %</th>
+                <th>Mem %</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for process in processes %}
+            <tr>
+                <td>{{ process.pid }}</td>
+                <td>{{ process.name }}</td>
+                <td>{{ process.cpu }}</td>
+                <td>{{ process.mem }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
