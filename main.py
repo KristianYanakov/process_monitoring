@@ -3,6 +3,22 @@ import psutil
 import argparse
 from tabulate import tabulate
 
+from collections import defaultdict, deque
+
+DATA_AVAILABLE_ELEMENTS_AT_A_TIME = 5
+THRESHOLD_COEFFICIENT = 3
+
+cpu_data_log = defaultdict(lambda: deque(maxlen=DATA_AVAILABLE_ELEMENTS_AT_A_TIME))
+mem_data_log = defaultdict(lambda: deque(maxlen=DATA_AVAILABLE_ELEMENTS_AT_A_TIME))
+
+def detect_spikes(curr, log_history):
+    if len(log_history) < DATA_AVAILABLE_ELEMENTS_AT_A_TIME:
+        return False #We don't have enough data yet and are still collecting to have 5 el
+
+    avg = sum(log_history) / len(log_history)
+
+    if curr > (avg * THRESHOLD_COEFFICIENT):
+        return True
 
 def get_processes():
     processes = []
@@ -10,12 +26,29 @@ def get_processes():
     for process in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
         try:
             process_info = process.info
+
+            pid = process_info['pid']
+            name = process_info['name']
+            cpu = process_info['cpu_percent']
+            mem = process_info['memory_percent']
+
+            cpu_data_log[pid].append(cpu)
+            mem_data_log[pid].append(mem)
+
+            cpu_spike = detect_spikes(cpu, cpu_data_log[pid])
+            mem_spike = detect_spikes(mem, mem_data_log[pid])
+
             processes.append({
                 'pid': process_info['pid'],
                 'name': process_info['name'],
                 'cpu': process_info['cpu_percent'],
                 'mem': process_info['memory_percent'],
+                'cpu_spike': cpu_spike,
+                'mem_spike': mem_spike,
             })
+
+
+
 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             continue
@@ -27,9 +60,26 @@ def get_processes():
 def display_processes(processes:list, sort_by:str, descending:bool):
     sorted_processes = sorted(processes, key = lambda x: x[sort_by], reverse=descending)
 
-    table = [[process['pid'], process['name'], f"{process['cpu']:.1f}%", f"{process['mem']:.1f}%"] for process in sorted_processes]
+    table = []
+    #table = [[process['pid'], process['name'], f"{process['cpu']:.1f}%", f"{process['mem']:.1f}%"] for process in sorted_processes]
 
-    print(tabulate(table, headers=['PID', 'Name', 'CPU %', "Memory %"], tablefmt='pretty'))
+    for process in sorted_processes:
+        alert = ""
+
+        if process.get('cpu_spike'):
+            alert += "DANGEROUS CPU"
+
+        if process.get("mem_spike"):
+            alert += "DANGEROUS MEM"
+
+        table.append([
+            process['pid'],
+            process['name'],
+            f"{process['cpu']:.2f}%",
+            f"{process['mem']:.2f}%",
+            alert,
+        ])
+    print(tabulate(table, headers=['PID', 'Name', 'CPU %', "Memory %", "Alert"], tablefmt='pretty'))
 
 
 #display_processes(get_processes(), 'pid', True)
