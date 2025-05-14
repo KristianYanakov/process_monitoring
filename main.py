@@ -3,7 +3,6 @@ import psutil
 import argparse
 from tabulate import tabulate
 
-#time_interval = float(input("Enter the time interval:"))
 
 def get_processes():
     processes = []
@@ -52,6 +51,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     monitor(args.interval, args.sort, args.descending)
-    #this is if you want to call it as such:
+    #this is if you want to call it with given values:
     #python main.py --interval 2 --sort mem --desc
     #refresh the table every 2 seconds, sort by memory usage descending
